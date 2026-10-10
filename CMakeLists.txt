@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(HypersTranslator
-    VERSION 1.0.0
+    VERSION 1.0.1
     DESCRIPTION "HYPERS TRANSLATOR - system-wide translation for Windows 11"
     HOMEPAGE_URL "https://github.com/zodiachz/test-"
     LANGUAGES CXX)
