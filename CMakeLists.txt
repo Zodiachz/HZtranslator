@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(HypersTranslator
     VERSION 1.0.2
-    DESCRIPTION "HYPERS TRANSLATOR - system-wide translation for Windows 11"
+    DESCRIPTION "HYPERS TRANSLATOR - system-wide translation for Windows 10 and 11"
     LANGUAGES CXX)
 
 if(NOT WIN32)

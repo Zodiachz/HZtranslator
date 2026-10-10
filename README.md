@@ -5,7 +5,7 @@
 <h1 align="center">HYPERS TRANSLATOR</h1>
 
 <p align="center">
-  <b>System-wide translation for Windows 11 (and 10).</b> Translate the text you select in any app, or any text on your screen.<br>
+  <b>System-wide translation for Windows 10 and 11.</b> Translate the text you select in any app, or any text on your screen.<br>
   Written in C++20 with Qt 6 and the Win32 / WinRT APIs.
 </p>
 
