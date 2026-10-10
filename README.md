@@ -36,10 +36,14 @@ Prebuilt portable builds are on the [Releases page](https://github.com/Zodiachz/
 
 A `.sha256` checksum is published next to each zip.
 
-To publish a release, maintainers push a version tag. CI then builds, tests and packages the app, and attaches the zip to a new GitHub Release:
+Maintainers have two ways to publish a release:
+- **From GitHub:** go to Actions → *Windows build* → *Run workflow*, and enter a version such as `v1.0.1`.
+- **From git:** push a version tag.
+
+Either way, CI builds, tests and packages the app, then attaches the zip to a new GitHub Release:
 
 ```bash
-git tag v1.0.0 && git push origin v1.0.0
+git tag v1.0.1 && git push origin v1.0.1
 ```
 
 ---

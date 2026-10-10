@@ -6,6 +6,11 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Publish a release with this tag (e.g. v1.0.0). Leave empty to only build.'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -57,10 +62,12 @@ jobs:
   release:
     name: Publish GitHub Release
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.version != '')
     runs-on: windows-latest
     permissions:
       contents: write
+    env:
+      VERSION: ${{ inputs.version || github.ref_name }}
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -70,14 +77,16 @@ jobs:
       - name: Zip portable app
         shell: pwsh
         run: |
-          $zip = "HypersTranslator-${{ github.ref_name }}-win64.zip"
+          $zip = "HypersTranslator-$env:VERSION-win64.zip"
           Compress-Archive -Path dist/HypersTranslator -DestinationPath $zip
           (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower() + "  " + $zip | Out-File -Encoding ascii "$zip.sha256"
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          name: HYPERS TRANSLATOR ${{ github.ref_name }}
+          tag_name: ${{ env.VERSION }}
+          target_commitish: ${{ github.sha }}
+          name: HYPERS TRANSLATOR ${{ env.VERSION }}
           body: |
             Portable build for Windows 10/11 x64. Unzip anywhere and run `HypersTranslator.exe`.
 
@@ -87,5 +96,5 @@ jobs:
             On first start, add a DeepL or Google Cloud Translation API key in Settings.
             The executable is not code-signed yet, so SmartScreen may ask for confirmation.
           files: |
-            HypersTranslator-${{ github.ref_name }}-win64.zip
-            HypersTranslator-${{ github.ref_name }}-win64.zip.sha256
+            HypersTranslator-${{ env.VERSION }}-win64.zip
+            HypersTranslator-${{ env.VERSION }}-win64.zip.sha256
