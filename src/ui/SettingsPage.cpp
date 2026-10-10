@@ -88,6 +88,12 @@ SettingsPage::SettingsPage(const AppContext& context, QWidget* parent)
     root->addWidget(buildOcrCard());
     root->addWidget(buildSystemCard());
     root->addStretch(1);
+    // Long explanations wrap instead of forcing the page wider than the window.
+    for (QLabel* label : content->findChildren<QLabel*>()) {
+        if (label->objectName() == QLatin1String("hint"))
+            label->setWordWrap(true);
+    }
+    m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_scroll->setWidget(content);
 
     connect(m_ctx.settings, &AppSettings::changed, this, [this](const QString& key) {

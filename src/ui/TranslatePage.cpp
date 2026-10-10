@@ -84,18 +84,20 @@ TranslatePage::TranslatePage(const AppContext& context, QWidget* parent)
     auto* tipRow1 = new QHBoxLayout;
     m_selectionHint = ui::kbd(QString());
     tipRow1->addWidget(m_selectionHint);
-    tipRow1->addWidget(ui::label(QStringLiteral("Select text in any app (Discord, browser, Word…) and press to translate it "
-                                                "in place."),
-                                 "muted"),
-                       1);
+    QLabel* tip1 = ui::label(QStringLiteral("Select text in any app (Discord, browser, Word…) and press to translate it "
+                                            "in place."),
+                             "muted");
+    tip1->setWordWrap(true);
+    tipRow1->addWidget(tip1, 1);
     tips->addLayout(tipRow1);
     auto* tipRow2 = new QHBoxLayout;
     m_ocrHint = ui::kbd(QString());
     tipRow2->addWidget(m_ocrHint);
-    tipRow2->addWidget(ui::label(QStringLiteral("Drag a region of the screen - text in images, games and videos is "
-                                                "recognised with Windows OCR and translated in a popup."),
-                                 "muted"),
-                       1);
+    QLabel* tip2 = ui::label(QStringLiteral("Drag a region of the screen - text in images, games and videos is "
+                                            "recognised with Windows OCR and translated in a popup."),
+                             "muted");
+    tip2->setWordWrap(true);
+    tipRow2->addWidget(tip2, 1);
     tips->addLayout(tipRow2);
 
     // Wiring

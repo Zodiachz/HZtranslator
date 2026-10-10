@@ -1,13 +1,40 @@
-# HYPERS TRANSLATOR
+<p align="center">
+  <img src="docs/media/hero.png" alt="HYPERS TRANSLATOR main window with a translation popup" width="900">
+</p>
 
-System-wide translation for Windows 11 (and 10), written in C++20 with Qt 6 and the Win32 / WinRT APIs.
+<h1 align="center">HYPERS TRANSLATOR</h1>
+
+<p align="center">
+  <b>System-wide translation for Windows 11 (and 10).</b> Translate the text you select in any app, or any text on your screen.<br>
+  Written in C++20 with Qt 6 and the Win32 / WinRT APIs.
+</p>
+
+<p align="center">
+  <a href="https://github.com/Zodiachz/test-/releases/latest"><b>⬇ Download the latest release</b></a>
+</p>
+
+## How it works
+
+<p align="center">
+  <img src="docs/media/demo.gif" alt="Demo: select text and press Ctrl+Alt+T to replace it with its translation; press Ctrl+Shift+S and drag over text on screen to translate it with OCR" width="900">
+</p>
 
 | Shortcut (default) | What it does |
 |---|---|
 | **Ctrl+Alt+T** | Translates the text selected in **any** app (Discord, browser, Word, VS Code…) and replaces it in place. You can also have it show a popup or copy to the clipboard. |
 | **Ctrl+Shift+S** | You drag a screen region. Windows' built-in OCR reads it locally, it is translated, and the result appears in a floating popup next to the region. |
 
-Other features:
+The app starts with Windows and waits quietly in the tray. No window opens until you click it.
+
+## Screenshots
+
+| Translate | History |
+|---|---|
+| <img src="docs/media/translate.png" alt="Translate page" width="440"> | <img src="docs/media/history.png" alt="History page" width="440"> |
+| **Settings** | **Result popup** |
+| <img src="docs/media/settings.png" alt="Settings page" width="440"> | <img src="docs/media/popup.png" alt="Floating result popup" width="440"> |
+
+## Features
 
 * **Pluggable translation layer.** DeepL API (Free and Pro) and Google Cloud Translation (v2). Requests are async, batched and chunked, with timeouts, exponential-backoff retries that honour `Retry-After`, typed errors and an in-memory cache.
 * **Secure API key storage.** Keys go in the Windows Credential Manager (DPAPI-encrypted per user). They are never written to the registry, files or logs.

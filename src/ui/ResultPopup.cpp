@@ -53,7 +53,8 @@ void applyDirection(QLabel* label, const QString& text)
 {
     const bool rtl = text.isRightToLeft();
     label->setLayoutDirection(rtl ? Qt::RightToLeft : Qt::LeftToRight);
-    label->setAlignment((rtl ? Qt::AlignRight : Qt::AlignLeft) | Qt::AlignTop);
+    // AlignLeft means the *leading* edge, i.e. the right side in a right-to-left label.
+    label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 }
 
 } // namespace
