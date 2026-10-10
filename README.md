@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Zodiachz/test-/releases/latest"><b>⬇ Download the latest release</b></a>
+  <a href="../../releases/latest"><b>⬇ Download the latest release</b></a>
 </p>
 
 ## How it works
@@ -56,7 +56,7 @@ The app starts with Windows and waits quietly in the tray. No window opens until
 
 ## Download
 
-Prebuilt portable builds are on the [Releases page](https://github.com/Zodiachz/test-/releases). To install one:
+Prebuilt portable builds are on the [Releases page](../../releases). To install one:
 
 1. Download `HypersTranslator-vX.Y.Z-win64.zip`.
 2. Unzip it anywhere and run `HypersTranslator.exe`. No installer or admin rights are needed.
