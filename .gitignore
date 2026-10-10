@@ -1,0 +1,15 @@
+# Build output
+/build*/
+/out/
+/dist/
+/_CPack_Packages/
+
+# IDEs
+/.vs/
+/.vscode/
+/.idea/
+*.user
+CMakeUserPresets.json
+
+# Python
+__pycache__/

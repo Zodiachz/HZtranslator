@@ -1,0 +1,91 @@
+name: Windows build
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: MSVC x64 / Qt 6.8
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.*'
+          arch: win64_msvc2022_64
+          cache: true
+
+      - name: Configure
+        run: cmake -S . -B build -A x64 -DHYPERS_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Unit tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Deploy (windeployqt)
+        run: cmake --install build --config Release --prefix "${{ github.workspace }}/dist/HypersTranslator"
+
+      - name: Verify portable layout
+        shell: pwsh
+        run: |
+          $root = "dist/HypersTranslator"
+          foreach ($f in "HypersTranslator.exe", "Qt6Core.dll", "Qt6Widgets.dll", "qt.conf", "plugins/platforms/qwindows.dll", "plugins/sqldrivers/qsqlite.dll", "plugins/tls/qschannelbackend.dll") {
+            if (-not (Test-Path "$root/$f")) { Write-Error "Missing $f in portable build"; exit 1 }
+          }
+          Get-ChildItem $root | Format-Table Name, Length
+
+      - name: Upload portable build
+        uses: actions/upload-artifact@v4
+        with:
+          name: HypersTranslator-win64
+          path: dist
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: HypersTranslator-win64
+          path: dist
+
+      - name: Zip portable app
+        shell: pwsh
+        run: |
+          $zip = "HypersTranslator-${{ github.ref_name }}-win64.zip"
+          Compress-Archive -Path dist/HypersTranslator -DestinationPath $zip
+          (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower() + "  " + $zip | Out-File -Encoding ascii "$zip.sha256"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: HYPERS TRANSLATOR ${{ github.ref_name }}
+          body: |
+            Portable build for Windows 10/11 x64. Unzip anywhere and run `HypersTranslator.exe`.
+
+            * **Ctrl+Alt+T** - translate the selected text in any app (replaces it in place)
+            * **Ctrl+Shift+S** - drag a screen region -> Windows OCR -> translation popup
+
+            On first start, add a DeepL or Google Cloud Translation API key in Settings.
+            The executable is not code-signed yet, so SmartScreen may ask for confirmation.
+          files: |
+            HypersTranslator-${{ github.ref_name }}-win64.zip
+            HypersTranslator-${{ github.ref_name }}-win64.zip.sha256
