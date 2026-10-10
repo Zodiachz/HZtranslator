@@ -94,6 +94,7 @@ jobs:
             * **Ctrl+Shift+S** - drag a screen region -> Windows OCR -> translation popup
 
             On first start, add a DeepL or Google Cloud Translation API key in Settings.
+            Translations and service errors (invalid key, quota, outages) come from the provider's API (DeepL / Google), not from the app.
             The executable is not code-signed yet, so SmartScreen may ask for confirmation.
           files: |
             HypersTranslator-${{ env.VERSION }}-win64.zip

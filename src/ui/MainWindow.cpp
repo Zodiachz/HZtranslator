@@ -140,6 +140,9 @@ QWidget* MainWindow::buildAboutPage()
                        "the recognised text is sent for translation."),
         QStringLiteral("• Providers: DeepL API and Google Cloud Translation. Keys live in Windows Credential Manager."),
         QStringLiteral("• History is stored locally in SQLite and can be turned off or cleared at any time."),
+        QStringLiteral("• Translations are produced by the provider you choose (DeepL or Google). Their wording and "
+                       "accuracy, and service errors such as an invalid key, a used-up quota or an outage, come from "
+                       "that provider's API - not from HYPERS TRANSLATOR."),
     };
     for (const QString& line : lines) {
         QLabel* l = ui::label(line, "muted");

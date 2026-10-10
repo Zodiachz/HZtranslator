@@ -191,7 +191,7 @@ void SelectionTranslator::onTranslated(TranslationReply* reply)
         if (reply->error().kind == TranslationErrorKind::Canceled) {
             m_popup->hide();
         } else {
-            m_popup->showError(reply->error().userMessage(), m_job->anchor, m_job->sourceText);
+            m_popup->showError(describeError(m_service, reply), m_job->anchor, m_job->sourceText);
         }
         finish();
         return;

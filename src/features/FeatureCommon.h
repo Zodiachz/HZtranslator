@@ -29,6 +29,33 @@ inline QString describeTranslation(const TranslationService* service, const Tran
     return title;
 }
 
+// Error text for the user. Problems reported by the translation service
+// (bad key, quota, outage, rejected request...) are attributed to it by name,
+// so it is clear they come from the provider's API and not from this app.
+inline QString describeError(const TranslationService* service, const TranslationReply* reply)
+{
+    const TranslationError& error = reply->error();
+    QString provider = reply->providerId();
+    if (service) {
+        if (const ITranslationProvider* p = service->provider(reply->providerId()))
+            provider = p->displayName();
+    }
+    switch (error.kind) {
+    case TranslationErrorKind::Authentication:
+    case TranslationErrorKind::QuotaExceeded:
+    case TranslationErrorKind::RateLimited:
+    case TranslationErrorKind::ServerError:
+    case TranslationErrorKind::BadRequest:
+    case TranslationErrorKind::InvalidResponse:
+    case TranslationErrorKind::UnsupportedLanguage:
+    case TranslationErrorKind::Timeout:
+        return QStringLiteral("%1: %2\n(This comes from the %1 service, not from HYPERS TRANSLATOR.)")
+            .arg(provider, error.userMessage());
+    default:
+        return error.userMessage();
+    }
+}
+
 inline void recordHistory(HistoryStore* history, const AppSettings* settings, const QString& origin,
                           const QString& application, const TranslationReply* reply)
 {

@@ -213,6 +213,16 @@ Files:
 
 ---
 
+## Translation quality and service errors
+
+HYPERS TRANSLATOR sends your text to the provider you selected (DeepL or Google Cloud Translation) and shows exactly what that service returns:
+
+* **Wording and accuracy** come from the provider's translation engine. If a translation is wrong or awkward, that is the API's output. Switching provider in Settings often gives a different result.
+* **Service errors** come from the provider's API: a rejected or expired API key, a used-up monthly quota, rate limiting, an unsupported language or a temporary outage. The app names the provider in these messages (for example *"DeepL: …"*). You fix them in your DeepL / Google Cloud account, not in the app.
+* **Network errors** mean the app could not reach the service at all. Check your internet connection, VPN or proxy.
+
+---
+
 ## Windows-specific limits
 
 These limits come from Windows itself, not from the app:

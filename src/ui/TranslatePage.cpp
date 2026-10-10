@@ -272,7 +272,7 @@ void TranslatePage::onFinished(TranslationReply* reply)
     m_translate->setEnabled(true);
     if (!reply->isSuccess()) {
         if (reply->error().kind != TranslationErrorKind::Canceled)
-            setStatus(reply->error().userMessage(), true);
+            setStatus(describeError(m_ctx.translation, reply), true);
         return;
     }
     const QString translated = reply->result().translatedText;

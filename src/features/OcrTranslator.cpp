@@ -116,7 +116,7 @@ void OcrTranslator::onTranslated(TranslationReply* reply)
 {
     if (!reply->isSuccess()) {
         if (reply->error().kind != TranslationErrorKind::Canceled)
-            m_popup->showError(reply->error().userMessage(), m_anchor, m_recognizedText);
+            m_popup->showError(describeError(m_service, reply), m_anchor, m_recognizedText);
         return;
     }
     recordHistory(m_history, m_settings, QStringLiteral("ocr"), QString(), reply);

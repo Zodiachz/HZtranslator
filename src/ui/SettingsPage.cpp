@@ -3,6 +3,7 @@
 #include "core/HistoryStore.h"
 #include "core/Languages.h"
 #include "core/Logger.h"
+#include "features/FeatureCommon.h"
 #include "platform/ISecretStore.h"
 #include "platform/win/AutoStart.h"
 #include "platform/win/GlobalHotkeyManager.h"
@@ -275,7 +276,7 @@ void SettingsPage::testKey(std::size_t index)
                               .arg(reply->elapsedMs()),
                           false);
         } else if (reply->error().kind != TranslationErrorKind::Canceled) {
-            ui::setStatus(r.status, QStringLiteral("✗ %1").arg(reply->error().userMessage()), true);
+            ui::setStatus(r.status, QStringLiteral("✗ %1").arg(describeError(m_ctx.translation, reply)), true);
         }
     });
 }
