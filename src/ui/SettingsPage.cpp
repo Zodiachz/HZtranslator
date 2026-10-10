@@ -523,10 +523,9 @@ QWidget* SettingsPage::buildSystemCard()
     });
     body->addWidget(m_autostart);
 
-    auto* minimized = new QCheckBox(QStringLiteral("When started with Windows, stay in the tray"));
-    minimized->setChecked(m_ctx.settings->startMinimized());
-    connect(minimized, &QCheckBox::toggled, this, [this](bool on) { m_ctx.settings->setStartMinimized(on); });
-    body->addWidget(minimized);
+    body->addWidget(ui::label(QStringLiteral("When Windows starts, HYPERS TRANSLATOR runs quietly in the tray - "
+                                             "no window opens until you click its tray icon or launch it again."),
+                              "hint"));
 
     auto* closeToTray = new QCheckBox(QStringLiteral("Closing the window keeps HYPERS TRANSLATOR running in the tray"));
     closeToTray->setChecked(m_ctx.settings->closeToTray());

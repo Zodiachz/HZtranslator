@@ -171,6 +171,10 @@ python tools/generate_icons.py
 3. Select text anywhere and press **Ctrl+Alt+T**.
 4. Press **Ctrl+Shift+S** and drag over any text on screen.
 
+**Startup.** On first launch HYPERS TRANSLATOR registers itself to start with Windows. At sign-in it runs quietly in the tray, and no window opens until you click the tray icon or launch the app again. Your shortcuts work right away. You can turn this off in Settings → System & privacy → *Start with Windows*.
+
+Extract the zip to a permanent folder before the first run. If you run the app from inside the zip, Windows runs it from a temporary folder, and autostart is not registered.
+
 Files:
 
 | What | Where |

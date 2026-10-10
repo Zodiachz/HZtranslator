@@ -119,21 +119,55 @@ bool HypersApp::initialize(bool launchedAtLogin)
     m_tray->show();
     registerHotkeysFromSettings();
     updateHotkeyHints();
-    autostart::refreshPathIfEnabled();
+    setUpAutostart(launchedAtLogin);
 
-    const ITranslationProvider* provider = m_translation->activeProvider();
-    if (!provider || !provider->hasApiKey()) {
-        // First run (or key removed): take the user straight to the key field.
-        m_window->showPage(MainWindow::Page::Settings);
+    if (launchedAtLogin) {
+        // Started with Windows: stay silent in the tray until the user opens the app.
+        qCInfo(lcApp) << "Started with Windows - running in the tray";
+    } else {
         showMainWindow();
-        m_window->settingsPage()->focusApiKey();
-        notify(QStringLiteral("Welcome to HYPERS TRANSLATOR"),
-               QStringLiteral("Add a DeepL or Google Cloud API key to start translating."), false);
-    } else if (!(launchedAtLogin && m_settings->startMinimized())) {
-        showMainWindow();
+        if (!hasApiKey()) {
+            notify(QStringLiteral("Welcome to HYPERS TRANSLATOR"),
+                   QStringLiteral("Add a DeepL or Google Cloud API key to start translating."), false);
+        }
     }
     qCInfo(lcApp) << "Ready - provider" << m_translation->activeProviderId();
     return true;
+}
+
+bool HypersApp::hasApiKey() const
+{
+    const ITranslationProvider* provider = m_translation->activeProvider();
+    return provider && provider->hasApiKey();
+}
+
+void HypersApp::setUpAutostart(bool launchedAtLogin)
+{
+    if (autostart::isRunningFromTemporaryLocation()) {
+        // Opened straight from the zip: Windows deletes this folder later, so
+        // registering it would leave a broken startup entry.
+        qCInfo(lcApp) << "Running from a temporary folder - not registering autostart";
+        if (!launchedAtLogin) {
+            notify(QStringLiteral("Extract HYPERS TRANSLATOR first"),
+                   QStringLiteral("You're running it from inside the zip. Extract the folder somewhere permanent "
+                                  "(e.g. Documents) so it can start automatically with Windows."),
+                   false);
+        }
+        return;
+    }
+
+    if (!m_settings->autostartConfigured()) {
+        // First run: start with Windows by default. Afterwards only the user's
+        // choice in Settings changes it.
+        QString error;
+        if (autostart::setEnabled(true, &error))
+            qCInfo(lcApp) << "Autostart enabled";
+        else
+            qCWarning(lcApp) << "Could not enable autostart:" << error;
+        m_settings->setAutostartConfigured(true);
+        return;
+    }
+    autostart::refreshPathIfEnabled();
 }
 
 void HypersApp::loadApiKeys()
@@ -216,6 +250,13 @@ void HypersApp::notify(const QString& title, const QString& message, bool isErro
 
 void HypersApp::showMainWindow()
 {
+    if (!hasApiKey()) {
+        // Nothing works without a key: go straight to the key field.
+        m_window->showPage(MainWindow::Page::Settings);
+        m_window->present();
+        m_window->settingsPage()->focusApiKey();
+        return;
+    }
     m_window->present();
 }
 

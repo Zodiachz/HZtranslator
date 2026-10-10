@@ -4,6 +4,9 @@
 
 #include <QAction>
 #include <QMenu>
+#include <QTimer>
+
+#include <memory>
 
 namespace hypers {
 
@@ -54,6 +57,23 @@ TrayController::~TrayController()
 void TrayController::show()
 {
     m_tray->show();
+    if (QSystemTrayIcon::isSystemTrayAvailable())
+        return;
+
+    // At sign-in the app can start before Explorer's taskbar exists. Keep
+    // checking and re-add the icon once the notification area is ready.
+    auto* retry = new QTimer(this);
+    retry->setInterval(2000);
+    auto attempts = std::make_shared<int>(0);
+    connect(retry, &QTimer::timeout, this, [this, retry, attempts] {
+        if (QSystemTrayIcon::isSystemTrayAvailable() || ++*attempts >= 90) {
+            m_tray->hide();
+            m_tray->show();
+            retry->stop();
+            retry->deleteLater();
+        }
+    });
+    retry->start();
 }
 
 void TrayController::setPaused(bool paused)

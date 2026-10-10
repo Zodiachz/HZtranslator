@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QStandardPaths>
 
 #include <cwchar>
 #include <optional>
@@ -84,6 +85,13 @@ bool setEnabled(bool enabled, QString* error)
         return false;
     }
     return true;
+}
+
+bool isRunningFromTemporaryLocation()
+{
+    const QString appDir = QDir::cleanPath(QCoreApplication::applicationDirPath());
+    const QString temp = QDir::cleanPath(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+    return !temp.isEmpty() && appDir.startsWith(temp, Qt::CaseInsensitive);
 }
 
 void refreshPathIfEnabled()

@@ -19,7 +19,7 @@ const QString OcrLanguage = QStringLiteral("ocr/language");
 const QString OcrMerge = QStringLiteral("ocr/mergeLines");
 const QString RequestTimeout = QStringLiteral("network/timeoutMs");
 const QString MaxRetries = QStringLiteral("network/maxRetries");
-const QString StartMinimized = QStringLiteral("system/startMinimized");
+const QString AutostartConfigured = QStringLiteral("system/autostartConfigured");
 const QString CloseToTray = QStringLiteral("system/closeToTray");
 const QString TrayHint = QStringLiteral("system/trayHintShown");
 const QString HistoryEnabled = QStringLiteral("history/enabled");
@@ -160,9 +160,9 @@ int AppSettings::maxRetries() const { return qBound(0, m_settings.value(keys::Ma
 
 void AppSettings::setMaxRetries(int retries) { write(keys::MaxRetries, qBound(0, retries, 8)); }
 
-bool AppSettings::startMinimized() const { return m_settings.value(keys::StartMinimized, true).toBool(); }
+bool AppSettings::autostartConfigured() const { return m_settings.value(keys::AutostartConfigured, false).toBool(); }
 
-void AppSettings::setStartMinimized(bool minimized) { write(keys::StartMinimized, minimized); }
+void AppSettings::setAutostartConfigured(bool configured) { write(keys::AutostartConfigured, configured); }
 
 bool AppSettings::closeToTray() const { return m_settings.value(keys::CloseToTray, true).toBool(); }
 

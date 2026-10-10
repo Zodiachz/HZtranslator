@@ -35,6 +35,8 @@ public Q_SLOTS:
 
 private:
     void loadApiKeys();
+    bool hasApiKey() const;
+    void setUpAutostart(bool launchedAtLogin);
     void applyTranslationSettings();
     void registerHotkeysFromSettings();
     void onHotkey(HotkeyAction action);

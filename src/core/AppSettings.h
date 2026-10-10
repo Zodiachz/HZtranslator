@@ -63,8 +63,9 @@ public:
     void setMaxRetries(int retries);
 
     // System
-    bool startMinimized() const;
-    void setStartMinimized(bool minimized);
+    // True once autostart was set up on first run; afterwards only the user changes it.
+    bool autostartConfigured() const;
+    void setAutostartConfigured(bool configured);
     bool closeToTray() const;
     void setCloseToTray(bool toTray);
     bool trayHintShown() const;
