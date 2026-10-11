@@ -82,6 +82,7 @@ bool HypersApp::initialize(bool launchedAtLogin)
         m_window->setHotkeysPaused(paused);
     });
     connect(m_selection, &SelectionTranslator::notification, this, &HypersApp::notify);
+    connect(m_selection, &SelectionTranslator::fallbackToScreenOcrRequested, m_ocr, &OcrTranslator::trigger);
     connect(m_ocr, &OcrTranslator::notification, this, &HypersApp::notify);
     connect(m_popup.get(), &ResultPopup::openInAppRequested, this, [this](const QString& text) {
         m_window->translatePage()->setSourceText(text, true);

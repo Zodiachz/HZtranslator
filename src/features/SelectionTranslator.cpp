@@ -73,11 +73,14 @@ void SelectionTranslator::trigger(std::optional<NativeHotkey> hotkey)
 
     const QString app = winutil::processNameForWindow(target);
     if (winutil::isWindowMoreElevatedThanUs(target)) {
+        // UIPI blocks our Ctrl+C as well, so the selection can't be read at all.
+        // Instead of a dead end, hand over to screen OCR so the user can drag over the text.
         Q_EMIT notification(
-            QStringLiteral("Can't reach %1").arg(app.isEmpty() ? QStringLiteral("this window") : app),
-            QStringLiteral("It runs as administrator, and Windows blocks keystrokes from non-elevated apps (UIPI). "
-                           "Run HYPERS TRANSLATOR as administrator to use it there, or use screen OCR instead."),
-            true);
+            QStringLiteral("%1 runs as administrator").arg(app.isEmpty() ? QStringLiteral("This window") : app),
+            QStringLiteral("Windows blocks keystrokes to admin apps, so switching to screen OCR: drag over the text "
+                           "to translate it. (Running HYPERS TRANSLATOR as administrator enables in-place replace.)"),
+            false);
+        Q_EMIT fallbackToScreenOcrRequested();
         return;
     }
 

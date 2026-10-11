@@ -42,6 +42,8 @@ public:
 
 Q_SIGNALS:
     void notification(const QString& title, const QString& message, bool isError);
+    // The target can't receive input (elevated window): continue with screen OCR instead.
+    void fallbackToScreenOcrRequested();
 
 private:
     struct Job {

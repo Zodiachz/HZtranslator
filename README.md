@@ -227,7 +227,7 @@ HYPERS TRANSLATOR sends your text to the provider you selected (DeepL or Google 
 
 These limits come from Windows itself, not from the app:
 
-* **Elevated apps (UIPI).** Windows silently drops keystrokes that a normal-integrity process sends to an app running as administrator. HYPERS TRANSLATOR detects this and tells you. To translate inside elevated apps, run it as administrator too. Screen OCR still works on them.
+* **Elevated apps (UIPI).** Windows silently drops keystrokes that a normal-integrity process sends to an app running as administrator, so the selected text can't be copied or replaced there. HYPERS TRANSLATOR detects this and switches straight to screen OCR, so you can drag over the text instead. To get in-place replace inside elevated apps, run HYPERS TRANSLATOR as administrator too.
 * **Secure desktop.** Hotkeys and input injection don't work on UAC prompts, the lock screen or Ctrl+Alt+Del. This is by design.
 * **Hotkeys are first come, first served.** `RegisterHotKey` fails if Windows or another app already owns the combination. The app reports this, and you choose another combination in Settings. Ctrl+Shift+S overrides "Save As" in apps while it is registered. Also, on layouts with AltGr, Ctrl+Alt+*key* is AltGr+*key*. Pick a different shortcut if that collides with a character you type.
 * **Clipboard-based selection.** Windows has no universal "get selected text" API, so the selection is read with a simulated Ctrl+C.
