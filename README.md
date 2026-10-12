@@ -22,6 +22,7 @@
 | Shortcut (default) | What it does |
 |---|---|
 | **Ctrl+Alt+T** | Translates the text selected in **any** app (Discord, browser, Word, VS Code…) and replaces it in place. You can also have it show a popup or copy to the clipboard. |
+| **Ctrl+Alt+Enter** | Type in your own language in any text box (chat, email, search…) and press it: everything in the box is translated (into English by default) and replaces what you typed, ready to send. No selecting needed. |
 | **Ctrl+Shift+S** | You drag a screen region. Windows' built-in OCR reads it locally, it is translated, and the result appears in a floating popup next to the region. |
 
 The app starts with Windows and waits quietly in the tray. No window opens until you click it.
@@ -44,6 +45,7 @@ The app starts with Windows and waits quietly in the tray. No window opens until
   * Hotkey recorder (layout-independent).
   * Target and source language, provider choice.
   * Selected-text action (replace, popup or copy).
+  * Separate language for typed text (English by default).
   * Popup timeout and clipboard timings.
   * OCR language and line merging.
   * Network timeout and retries.
@@ -113,6 +115,7 @@ src/
 │       └── MessageWindow.*      RAII HWND_MESSAGE window
 ├── features/
 │   ├── SelectionTranslator.*    copy -> translate -> replace/popup/copy workflow
+│   │                            (typed mode: Ctrl+A first, always replace)
 │   ├── OcrTranslator.*          region -> OCR (worker thread) -> translate -> popup
 │   └── FeatureCommon.h          shared captions + history recording
 └── ui/
@@ -196,7 +199,8 @@ python tools/generate_icons.py
    * Google: create an API key in Google Cloud Console and enable the *Cloud Translation API*.
 2. Choose the target language. The language you translate *into* applies to all workflows.
 3. Select text anywhere and press **Ctrl+Alt+T**.
-4. Press **Ctrl+Shift+S** and drag over any text on screen.
+4. Type a message in any text box and press **Ctrl+Alt+Enter** to replace it with its English translation. Change the language in Settings › *Translate typed text into*.
+5. Press **Ctrl+Shift+S** and drag over any text on screen.
 
 **Startup.** On first launch HYPERS TRANSLATOR registers itself to start with Windows. At sign-in it runs quietly in the tray, and no window opens until you click the tray icon or launch the app again. Your shortcuts work right away. You can turn this off in Settings → System & privacy → *Start with Windows*.
 

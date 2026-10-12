@@ -82,12 +82,14 @@ void TrayController::setPaused(bool paused)
     if (m_pauseAction->isChecked() != paused)
         m_pauseAction->setChecked(paused);
     m_tray->setIcon(theme::trayIcon(paused));
-    setHotkeyHints(m_selectionHint, m_ocrHint);
+    setHotkeyHints(m_selectionHint, m_typedHint, m_ocrHint);
 }
 
-void TrayController::setHotkeyHints(const QString& selectionHotkey, const QString& ocrHotkey)
+void TrayController::setHotkeyHints(const QString& selectionHotkey, const QString& typedHotkey,
+                                    const QString& ocrHotkey)
 {
     m_selectionHint = selectionHotkey;
+    m_typedHint = typedHotkey;
     m_ocrHint = ocrHotkey;
     m_ocrAction->setText(ocrHotkey.isEmpty() ? QStringLiteral("Translate screen region")
                                              : QStringLiteral("Translate screen region\t%1").arg(ocrHotkey));
@@ -97,6 +99,8 @@ void TrayController::setHotkeyHints(const QString& selectionHotkey, const QStrin
     } else {
         if (!selectionHotkey.isEmpty())
             tip += QStringLiteral("\nSelection: %1").arg(selectionHotkey);
+        if (!typedHotkey.isEmpty())
+            tip += QStringLiteral("\nTyped text: %1").arg(typedHotkey);
         if (!ocrHotkey.isEmpty())
             tip += QStringLiteral("\nScreen OCR: %1").arg(ocrHotkey);
     }

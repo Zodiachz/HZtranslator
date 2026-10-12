@@ -87,6 +87,7 @@ public:
             case Origin: {
                 QString origin = e->origin == QLatin1String("ocr")         ? QStringLiteral("Screen OCR")
                     : e->origin == QLatin1String("selection")              ? QStringLiteral("Selection")
+                    : e->origin == QLatin1String("typed")                  ? QStringLiteral("Typed text")
                                                                            : QStringLiteral("Manual");
                 if (!e->application.isEmpty())
                     origin += QStringLiteral(" · ") + e->application;

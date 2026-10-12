@@ -68,6 +68,7 @@ private:
     QComboBox* m_provider = nullptr;
     LanguageComboBox* m_target = nullptr;
     LanguageComboBox* m_source = nullptr;
+    LanguageComboBox* m_typingTarget = nullptr;
     std::vector<KeyRow> m_keys;
     std::vector<HotkeyRow> m_hotkeys;
     QLabel* m_hotkeyStatus = nullptr;

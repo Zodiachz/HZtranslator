@@ -18,6 +18,7 @@ enum class HotkeyAction {
     TranslateSelection = 1,
     OcrRegion = 2,
     ShowWindow = 3,
+    TranslateTyped = 4, // select everything in the focused field, translate, paste back
 };
 
 // Typed facade over QSettings (HKCU\Software\Hypers\HYPERS TRANSLATOR).
@@ -34,6 +35,9 @@ public:
     void setTargetLanguage(const QString& code);
     QString sourceLanguage() const; // "auto" or a language code
     void setSourceLanguage(const QString& code);
+    // Language for the "translate what I typed" shortcut (independent of targetLanguage).
+    QString typingTargetLanguage() const;
+    void setTypingTargetLanguage(const QString& code);
 
     // Hotkeys
     QKeySequence hotkey(HotkeyAction action) const;

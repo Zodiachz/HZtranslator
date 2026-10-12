@@ -195,8 +195,8 @@ void HypersApp::applyTranslationSettings()
 void HypersApp::registerHotkeysFromSettings()
 {
     QStringList failures;
-    for (HotkeyAction action :
-         {HotkeyAction::TranslateSelection, HotkeyAction::OcrRegion, HotkeyAction::ShowWindow}) {
+    for (HotkeyAction action : {HotkeyAction::TranslateSelection, HotkeyAction::TranslateTyped,
+                                HotkeyAction::OcrRegion, HotkeyAction::ShowWindow}) {
         const QKeySequence sequence = m_settings->hotkey(action);
         if (sequence.isEmpty())
             continue;
@@ -214,6 +214,9 @@ void HypersApp::onHotkey(HotkeyAction action)
     switch (action) {
     case HotkeyAction::TranslateSelection:
         m_selection->trigger(m_hotkeys->nativeHotkey(action));
+        break;
+    case HotkeyAction::TranslateTyped:
+        m_selection->trigger(m_hotkeys->nativeHotkey(action), SelectionTranslator::Mode::Typed);
         break;
     case HotkeyAction::OcrRegion:
         m_ocr->trigger();
@@ -239,6 +242,7 @@ void HypersApp::onSettingChanged(const QString& key)
 void HypersApp::updateHotkeyHints()
 {
     m_tray->setHotkeyHints(m_settings->hotkey(HotkeyAction::TranslateSelection).toString(QKeySequence::NativeText),
+                           m_settings->hotkey(HotkeyAction::TranslateTyped).toString(QKeySequence::NativeText),
                            m_settings->hotkey(HotkeyAction::OcrRegion).toString(QKeySequence::NativeText));
 }
 

@@ -30,14 +30,23 @@ class ResultPopup;
 // 4. depending on the configured action: paste the translation over the
 //    still-selected text (Ctrl+V, then restore the clipboard again), show it
 //    in a popup, or copy it.
+//
+// In Typed mode ("type, press the hotkey, it becomes English") step 2 first
+// sends Ctrl+A so everything in the focused field is taken, the typing target
+// language is used, and the result always replaces the text.
 class SelectionTranslator : public QObject {
     Q_OBJECT
 public:
+    enum class Mode {
+        Selection, // the text the user selected
+        Typed,     // everything in the focused text field
+    };
+
     SelectionTranslator(AppSettings* settings, TranslationService* service, HistoryStore* history,
                         ResultPopup* popup, QObject* parent = nullptr);
     ~SelectionTranslator() override;
 
-    void trigger(std::optional<NativeHotkey> hotkey);
+    void trigger(std::optional<NativeHotkey> hotkey, Mode mode = Mode::Selection);
     bool isBusy() const { return m_job.has_value(); }
 
 Q_SIGNALS:
@@ -49,6 +58,7 @@ private:
     struct Job {
         quint64 id = 0;
         HWND target = nullptr;
+        Mode mode = Mode::Selection;
         QString application;
         SelectionAction action = SelectionAction::Replace;
         QRect anchor;
@@ -59,6 +69,7 @@ private:
 
     // True if job `id` is still the current one (callbacks may outlive their job).
     bool isCurrent(quint64 id) const { return m_job && m_job->id == id; }
+    void selectAll();
     void copySelection();
     void readCopiedText();
     void translate(const QString& text);

@@ -16,7 +16,7 @@ public:
 
     void show();
     void setPaused(bool paused);
-    void setHotkeyHints(const QString& selectionHotkey, const QString& ocrHotkey);
+    void setHotkeyHints(const QString& selectionHotkey, const QString& typedHotkey, const QString& ocrHotkey);
     void notify(const QString& title, const QString& message, bool isError);
 
 Q_SIGNALS:
@@ -34,6 +34,7 @@ private:
     QAction* m_pauseAction;
     bool m_paused = false;
     QString m_selectionHint;
+    QString m_typedHint;
     QString m_ocrHint;
 };
 

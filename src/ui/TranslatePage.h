@@ -46,6 +46,7 @@ private:
     QLabel* m_counter = nullptr;
     QLabel* m_status = nullptr;
     QLabel* m_selectionHint = nullptr;
+    QLabel* m_typedHint = nullptr;
     QLabel* m_ocrHint = nullptr;
     QPointer<TranslationReply> m_reply;
     QString m_lastDetected;

@@ -90,6 +90,15 @@ TranslatePage::TranslatePage(const AppContext& context, QWidget* parent)
     tip1->setWordWrap(true);
     tipRow1->addWidget(tip1, 1);
     tips->addLayout(tipRow1);
+    auto* tipRowTyped = new QHBoxLayout;
+    m_typedHint = ui::kbd(QString());
+    tipRowTyped->addWidget(m_typedHint);
+    QLabel* tipTyped = ui::label(QStringLiteral("Type in your own language in any text box (chat, email, search…) and "
+                                                "press to replace it with the translation, ready to send."),
+                                 "muted");
+    tipTyped->setWordWrap(true);
+    tipRowTyped->addWidget(tipTyped, 1);
+    tips->addLayout(tipRowTyped);
     auto* tipRow2 = new QHBoxLayout;
     m_ocrHint = ui::kbd(QString());
     tipRow2->addWidget(m_ocrHint);
@@ -176,8 +185,10 @@ void TranslatePage::syncFromSettings()
 void TranslatePage::refreshHotkeyHints()
 {
     const QString selection = m_ctx.settings->hotkey(HotkeyAction::TranslateSelection).toString(QKeySequence::NativeText);
+    const QString typed = m_ctx.settings->hotkey(HotkeyAction::TranslateTyped).toString(QKeySequence::NativeText);
     const QString ocr = m_ctx.settings->hotkey(HotkeyAction::OcrRegion).toString(QKeySequence::NativeText);
     m_selectionHint->setText(selection.isEmpty() ? QStringLiteral("not set") : selection);
+    m_typedHint->setText(typed.isEmpty() ? QStringLiteral("not set") : typed);
     m_ocrHint->setText(ocr.isEmpty() ? QStringLiteral("not set") : ocr);
 }
 

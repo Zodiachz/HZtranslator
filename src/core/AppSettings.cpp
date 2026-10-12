@@ -11,6 +11,7 @@ namespace keys {
 const QString Provider = QStringLiteral("translation/provider");
 const QString Target = QStringLiteral("translation/targetLanguage");
 const QString Source = QStringLiteral("translation/sourceLanguage");
+const QString TypingTarget = QStringLiteral("translation/typingTargetLanguage");
 const QString SelectionActionKey = QStringLiteral("behavior/selectionAction");
 const QString PopupTimeout = QStringLiteral("behavior/popupTimeoutSec");
 const QString RestoreDelay = QStringLiteral("behavior/clipboardRestoreDelayMs");
@@ -67,12 +68,21 @@ QString AppSettings::sourceLanguage() const
 
 void AppSettings::setSourceLanguage(const QString& code) { write(keys::Source, code); }
 
+QString AppSettings::typingTargetLanguage() const
+{
+    const QString code = m_settings.value(keys::TypingTarget, QStringLiteral("en-US")).toString();
+    return Languages::find(code) ? code : QStringLiteral("en-US");
+}
+
+void AppSettings::setTypingTargetLanguage(const QString& code) { write(keys::TypingTarget, code); }
+
 QString AppSettings::hotkeyKey(HotkeyAction action)
 {
     switch (action) {
     case HotkeyAction::TranslateSelection: return QStringLiteral("hotkeys/translateSelection");
     case HotkeyAction::OcrRegion: return QStringLiteral("hotkeys/ocrRegion");
     case HotkeyAction::ShowWindow: return QStringLiteral("hotkeys/showWindow");
+    case HotkeyAction::TranslateTyped: return QStringLiteral("hotkeys/translateTyped");
     }
     return {};
 }
@@ -83,6 +93,7 @@ QKeySequence AppSettings::defaultHotkey(HotkeyAction action)
     case HotkeyAction::TranslateSelection: return QKeySequence(QStringLiteral("Ctrl+Alt+T"));
     case HotkeyAction::OcrRegion: return QKeySequence(QStringLiteral("Ctrl+Shift+S"));
     case HotkeyAction::ShowWindow: return QKeySequence();
+    case HotkeyAction::TranslateTyped: return QKeySequence(QStringLiteral("Ctrl+Alt+Return"));
     }
     return {};
 }

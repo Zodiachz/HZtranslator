@@ -136,6 +136,8 @@ QWidget* MainWindow::buildAboutPage()
     const QStringList lines = {
         QStringLiteral("• Selected text: the shortcut copies your selection, translates it with your provider and "
                        "pastes the result over it. Your clipboard is restored afterwards."),
+        QStringLiteral("• Typed text: type in any text box and press the shortcut; it selects everything in the box "
+                       "(Ctrl+A), translates it (into English by default) and pastes the result in its place."),
         QStringLiteral("• Screen OCR: drag a region; Windows' built-in OCR reads it on this PC (offline), then only "
                        "the recognised text is sent for translation."),
         QStringLiteral("• Providers: DeepL API and Google Cloud Translation. Keys live in Windows Credential Manager."),

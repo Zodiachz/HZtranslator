@@ -21,6 +21,7 @@ namespace {
 constexpr int kHotkeyReleaseTimeoutMs = 1500;
 constexpr int kClipboardSettleMs = 40;   // some apps write several formats in sequence
 constexpr int kModifierWaitBeforePasteMs = 1500;
+constexpr int kSelectAllSettleMs = 60;   // let the app apply Ctrl+A before Ctrl+C
 
 QString preview(const QString& text, int maxChars = 90)
 {
@@ -61,7 +62,7 @@ QRect SelectionTranslator::anchorFor(HWND target) const
     return QRect(cursor - QPoint(4, 4), QSize(8, 8));
 }
 
-void SelectionTranslator::trigger(std::optional<NativeHotkey> hotkey)
+void SelectionTranslator::trigger(std::optional<NativeHotkey> hotkey, Mode mode)
 {
     if (m_job) {
         qCInfo(lcSelection) << "Ignoring hotkey - a translation is already in progress";
@@ -72,6 +73,15 @@ void SelectionTranslator::trigger(std::optional<NativeHotkey> hotkey)
         return;
 
     const QString app = winutil::processNameForWindow(target);
+    if (winutil::isWindowMoreElevatedThanUs(target) && mode == Mode::Typed) {
+        // Screen OCR can't help here: the point is to paste into the window.
+        Q_EMIT notification(
+            QStringLiteral("%1 runs as administrator").arg(app.isEmpty() ? QStringLiteral("This window") : app),
+            QStringLiteral("Windows blocks keystrokes to admin apps, so the text can't be replaced. Run HYPERS "
+                           "TRANSLATOR as administrator to translate what you type there."),
+            true);
+        return;
+    }
     if (winutil::isWindowMoreElevatedThanUs(target)) {
         // UIPI blocks our Ctrl+C as well, so the selection can't be read at all.
         // Instead of a dead end, hand over to screen OCR so the user can drag over the text.
@@ -87,12 +97,14 @@ void SelectionTranslator::trigger(std::optional<NativeHotkey> hotkey)
     Job job;
     job.id = m_nextJobId++;
     job.target = target;
+    job.mode = mode;
     job.application = app;
-    job.action = m_settings->selectionAction();
+    // Typed text is always replaced: the point is to send it in the other language.
+    job.action = (mode == Mode::Typed) ? SelectionAction::Replace : m_settings->selectionAction();
     job.anchor = anchorFor(target);
     m_job = std::move(job);
     const quint64 id = m_job->id;
-    qCInfo(lcSelection) << "Translate selection in" << app;
+    qCInfo(lcSelection) << (mode == Mode::Typed ? "Translate typed text in" : "Translate selection in") << app;
 
     const unsigned int hotkeyVk = hotkey ? hotkey->virtualKey : 0;
     waitUntil(
@@ -104,8 +116,28 @@ void SelectionTranslator::trigger(std::optional<NativeHotkey> hotkey)
                 qCInfo(lcSelection) << "Hotkey still held - releasing modifiers synthetically";
                 input::releaseModifiers();
             }
-            copySelection();
+            if (m_job->mode == Mode::Typed)
+                selectAll();
+            else
+                copySelection();
         });
+}
+
+void SelectionTranslator::selectAll()
+{
+    if (winutil::foregroundWindow() != m_job->target) {
+        finish(); // the user switched windows while we waited - do nothing
+        return;
+    }
+    if (!input::sendCtrlChord('A')) {
+        fail(QStringLiteral("Windows rejected the simulated Ctrl+A."));
+        return;
+    }
+    const quint64 id = m_job->id;
+    QTimer::singleShot(kSelectAllSettleMs, this, [this, id] {
+        if (isCurrent(id))
+            copySelection();
+    });
 }
 
 void SelectionTranslator::copySelection()
@@ -137,9 +169,16 @@ void SelectionTranslator::copySelection()
                 return;
             if (!changed) {
                 m_job->snapshot.reset(); // clipboard untouched - nothing to restore
-                Q_EMIT notification(QStringLiteral("No text selected"),
-                                    QStringLiteral("Select some text first. (The app may also not support Ctrl+C.)"),
-                                    false);
+                if (m_job->mode == Mode::Typed)
+                    Q_EMIT notification(QStringLiteral("Nothing to translate"),
+                                        QStringLiteral("Click into a text field and type something first. (The app "
+                                                       "may also not support Ctrl+A / Ctrl+C.)"),
+                                        false);
+                else
+                    Q_EMIT notification(QStringLiteral("No text selected"),
+                                        QStringLiteral("Select some text first. (The app may also not support "
+                                                       "Ctrl+C.)"),
+                                        false);
                 finish();
                 return;
             }
@@ -157,7 +196,9 @@ void SelectionTranslator::readCopiedText()
 
     if (!text || text->trimmed().isEmpty()) {
         Q_EMIT notification(QStringLiteral("Nothing to translate"),
-                            QStringLiteral("The selection doesn't contain any text."), false);
+                            m_job->mode == Mode::Typed ? QStringLiteral("The text field is empty.")
+                                                       : QStringLiteral("The selection doesn't contain any text."),
+                            false);
         finish();
         return;
     }
@@ -172,7 +213,8 @@ void SelectionTranslator::translate(const QString& text)
     TranslationRequest request;
     request.text = text;
     request.sourceLanguage = m_settings->sourceLanguage();
-    request.targetLanguage = m_settings->targetLanguage();
+    request.targetLanguage =
+        (m_job->mode == Mode::Typed) ? m_settings->typingTargetLanguage() : m_settings->targetLanguage();
 
     TranslationReply* reply = m_service->translate(request, this);
     m_job->reply = reply;
@@ -200,7 +242,9 @@ void SelectionTranslator::onTranslated(TranslationReply* reply)
         return;
     }
 
-    recordHistory(m_history, m_settings, QStringLiteral("selection"), m_job->application, reply);
+    recordHistory(m_history, m_settings,
+                  m_job->mode == Mode::Typed ? QStringLiteral("typed") : QStringLiteral("selection"),
+                  m_job->application, reply);
     const QString translation = reply->result().translatedText;
     const QString title = describeTranslation(m_service, reply);
 
@@ -269,7 +313,8 @@ void SelectionTranslator::pasteTranslation(const QString& translation, const QSt
                     restoreClipboard();
                 else
                     qCInfo(lcSelection) << "Clipboard changed after paste - not restoring";
-                qCInfo(lcSelection) << "Replaced selection in" << m_job->application;
+                qCInfo(lcSelection) << (m_job->mode == Mode::Typed ? "Replaced typed text in" : "Replaced selection in")
+                                    << m_job->application;
                 finish();
             });
         });

@@ -57,6 +57,7 @@ QString hotkeyLabel(HotkeyAction action)
 {
     switch (action) {
     case HotkeyAction::TranslateSelection: return QStringLiteral("Translate selected text");
+    case HotkeyAction::TranslateTyped: return QStringLiteral("Translate what I typed");
     case HotkeyAction::OcrRegion: return QStringLiteral("Translate screen region (OCR)");
     case HotkeyAction::ShowWindow: return QStringLiteral("Open HYPERS TRANSLATOR");
     }
@@ -135,6 +136,15 @@ QWidget* SettingsPage::buildTranslationCard()
     });
     form->addRow(QStringLiteral("Translate into"), m_target);
     form->addRow(QStringLiteral("Source language"), m_source);
+
+    m_typingTarget = new LanguageComboBox(false);
+    m_typingTarget->setToolTip(QStringLiteral("Used by the “Translate what I typed” shortcut: type in your language, "
+                                              "press it, and the text in the field is replaced by this language."));
+    connect(m_typingTarget, &LanguageComboBox::codeChanged, this, [this](const QString& code) {
+        if (!code.isEmpty())
+            m_ctx.settings->setTypingTargetLanguage(code);
+    });
+    form->addRow(QStringLiteral("Translate typed text into"), m_typingTarget);
 
     addKeyRow(form, QStringLiteral("deepl"), QStringLiteral("DeepL API key"),
               QStringLiteral("Free or Pro key from deepl.com/your-account/keys. Free keys end in “:fx”."));
@@ -308,12 +318,15 @@ void SettingsPage::syncLanguageCombos()
     ITranslationProvider* provider = m_ctx.translation->provider(m_ctx.settings->providerId());
     if (provider) {
         m_target->setFilter([provider](const QString& c) { return provider->supportsTargetLanguage(c); });
+        m_typingTarget->setFilter([provider](const QString& c) { return provider->supportsTargetLanguage(c); });
         m_source->setFilter([provider](const QString& c) { return provider->supportsSourceLanguage(c); });
     }
     const QSignalBlocker b1(m_target);
     const QSignalBlocker b2(m_source);
     const QSignalBlocker b3(m_provider);
+    const QSignalBlocker b4(m_typingTarget);
     m_target->setCurrentCode(m_ctx.settings->targetLanguage());
+    m_typingTarget->setCurrentCode(m_ctx.settings->typingTargetLanguage());
     m_source->setCurrentCode(m_ctx.settings->sourceLanguage());
     m_provider->setCurrentIndex(qMax(0, m_provider->findData(m_ctx.settings->providerId())));
 }
@@ -343,8 +356,8 @@ QWidget* SettingsPage::buildHotkeyCard()
     QFormLayout* form = makeForm();
     body->addLayout(form);
 
-    for (HotkeyAction action :
-         {HotkeyAction::TranslateSelection, HotkeyAction::OcrRegion, HotkeyAction::ShowWindow}) {
+    for (HotkeyAction action : {HotkeyAction::TranslateSelection, HotkeyAction::TranslateTyped,
+                                HotkeyAction::OcrRegion, HotkeyAction::ShowWindow}) {
         HotkeyRow row{action, new HotkeyEdit};
         row.edit->setKeySequence(m_ctx.settings->hotkey(action));
         row.edit->setMaximumWidth(260);
