@@ -153,7 +153,7 @@ ResultPopup::ResultPopup(QWidget* parent)
         m_status->setText(m_statusBase + QString(m_dotCount, QLatin1Char('.')));
     });
 
-    connect(m_close, &QToolButton::clicked, this, &QWidget::hide);
+    connect(m_close, &QToolButton::clicked, this, &ResultPopup::dismiss);
     connect(m_pin, &QToolButton::toggled, this, [this](bool pinned) {
         m_pinned = pinned;
         if (pinned)
@@ -312,6 +312,14 @@ void ResultPopup::placeNear(const QRect& anchor)
     move(x, y);
 }
 
+void ResultPopup::dismiss()
+{
+    const bool wasLoading = m_mode == Mode::Loading && isVisible();
+    hide();
+    if (wasLoading)
+        Q_EMIT canceled();
+}
+
 void ResultPopup::restartAutoHide()
 {
     if (m_pinned || m_autoHideSeconds <= 0 || m_mode == Mode::Loading || underMouse())
@@ -322,7 +330,7 @@ void ResultPopup::restartAutoHide()
 void ResultPopup::keyPressEvent(QKeyEvent* event)
 {
     if (event->key() == Qt::Key_Escape) {
-        hide();
+        dismiss();
         return;
     }
     if (event->matches(QKeySequence::Copy) && m_mode == Mode::Result && !m_text->hasSelectedText()) {

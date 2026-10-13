@@ -46,6 +46,7 @@ private:
     QPointer<TranslationReply> m_reply;
     QRect m_anchor;
     QString m_recognizedText;
+    bool m_ocrCanceled = false;
 };
 
 } // namespace hypers

@@ -41,6 +41,10 @@ SelectionTranslator::SelectionTranslator(AppSettings* settings, TranslationServi
     , m_popup(popup)
     , m_clipboardOwner(std::make_unique<MessageWindow>())
 {
+    connect(m_popup, &ResultPopup::canceled, this, [this] {
+        if (m_job && m_job->reply)
+            m_job->reply->abort(); // -> onTranslated() with Canceled -> finish()
+    });
 }
 
 SelectionTranslator::~SelectionTranslator()
@@ -73,7 +77,8 @@ void SelectionTranslator::trigger(std::optional<NativeHotkey> hotkey, Mode mode)
         return;
 
     const QString app = winutil::processNameForWindow(target);
-    if (winutil::isWindowMoreElevatedThanUs(target) && mode == Mode::Typed) {
+    const bool elevated = winutil::isWindowMoreElevatedThanUs(target);
+    if (elevated && mode == Mode::Typed) {
         // Screen OCR can't help here: the point is to paste into the window.
         Q_EMIT notification(
             QStringLiteral("%1 runs as administrator").arg(app.isEmpty() ? QStringLiteral("This window") : app),
@@ -82,7 +87,7 @@ void SelectionTranslator::trigger(std::optional<NativeHotkey> hotkey, Mode mode)
             true);
         return;
     }
-    if (winutil::isWindowMoreElevatedThanUs(target)) {
+    if (elevated) {
         // UIPI blocks our Ctrl+C as well, so the selection can't be read at all.
         // Instead of a dead end, hand over to screen OCR so the user can drag over the text.
         Q_EMIT notification(

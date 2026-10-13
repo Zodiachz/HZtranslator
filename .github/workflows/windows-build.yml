@@ -91,6 +91,7 @@ jobs:
             Portable build for Windows 10/11 x64. Unzip anywhere and run `HypersTranslator.exe`.
 
             * **Ctrl+Alt+T** - translate the selected text in any app (replaces it in place)
+            * **Ctrl+Alt+Enter** - translate everything you typed in the focused text box (replaces it, ready to send)
             * **Ctrl+Shift+S** - drag a screen region -> Windows OCR -> translation popup
 
             On first start, add a DeepL or Google Cloud Translation API key in Settings.

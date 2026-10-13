@@ -124,12 +124,14 @@ void TranslationReply::start()
         m_request.sourceLanguage = QString::fromLatin1(Languages::kAuto);
     }
 
-    const QString key = TranslationService::cacheKey(m_providerId, m_request);
-    if (const TranslationResult* cached = m_service->m_cache.object(key)) {
-        TranslationResult copy = *cached;
-        copy.fromCache = true;
-        finishWith(copy);
-        return;
+    if (m_request.text.size() <= TranslationService::kMaxCachedCharacters) {
+        const QString key = TranslationService::cacheKey(m_providerId, m_request);
+        if (const TranslationResult* cached = m_service->m_cache.object(key)) {
+            TranslationResult copy = *cached;
+            copy.fromCache = true;
+            finishWith(copy);
+            return;
+        }
     }
 
     // Split into segments and group them into requests within provider limits.
@@ -391,9 +393,10 @@ void TranslationService::storeInCache(const QString& providerId, const Translati
                                       const TranslationResult& result)
 {
     // Large texts are not worth keeping in memory.
-    if (request.text.size() > 20000)
+    if (request.text.size() > kMaxCachedCharacters)
         return;
-    m_cache.insert(cacheKey(providerId, request), new TranslationResult(result));
+    const qsizetype cost = qMax<qsizetype>(1, request.text.size() + result.translatedText.size());
+    m_cache.insert(cacheKey(providerId, request), new TranslationResult(result), cost);
 }
 
 } // namespace hypers

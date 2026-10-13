@@ -35,6 +35,8 @@ public:
 
 Q_SIGNALS:
     void openInAppRequested(const QString& original);
+    // The user closed the popup (close button or Esc) while it was still loading.
+    void canceled();
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;
@@ -53,6 +55,7 @@ private:
     void restartAutoHide();
     void updateTextHeights();
     void setOriginalVisible(bool visible);
+    void dismiss();
 
     Mode m_mode = Mode::Loading;
     QFrame* m_card = nullptr;

@@ -109,6 +109,7 @@ public:
                                     QObject* parent = nullptr);
 
     static constexpr int kMaxInputCharacters = 100000;
+    static constexpr int kMaxCachedCharacters = 20000; // larger texts are not cached
 
 Q_SIGNALS:
     void activeProviderChanged(const QString& id);
@@ -123,7 +124,8 @@ private:
     QString m_activeProviderId;
     RetryPolicy m_retryPolicy;
     int m_timeoutMs = 15000;
-    QCache<QString, TranslationResult> m_cache{256};
+    // Cost = characters held (source + translation), so a few long texts can't pin megabytes.
+    QCache<QString, TranslationResult> m_cache{1000000};
 };
 
 } // namespace hypers

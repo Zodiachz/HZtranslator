@@ -29,6 +29,13 @@ OcrTranslator::OcrTranslator(AppSettings* settings, TranslationService* service,
 {
     connect(m_selector, &RegionSelector::regionSelected, this, &OcrTranslator::onRegionSelected);
     connect(&m_ocrWatcher, &QFutureWatcher<OcrOutput>::finished, this, &OcrTranslator::onOcrFinished);
+    connect(m_popup, &ResultPopup::canceled, this, [this] {
+        // Windows OCR can't be interrupted; its result is discarded instead.
+        if (m_ocrWatcher.isRunning())
+            m_ocrCanceled = true;
+        if (m_reply)
+            m_reply->abort();
+    });
 }
 
 OcrTranslator::~OcrTranslator()
@@ -69,6 +76,7 @@ void OcrTranslator::onRegionSelected(const QImage& image, const QRect& globalRec
 {
     m_anchor = globalRect;
     m_recognizedText.clear();
+    m_ocrCanceled = false;
     m_popup->showLoading(QStringLiteral("Recognizing text"), m_anchor);
     qCInfo(lcOcrFlow) << "OCR on" << image.size() << "px region";
     m_ocrWatcher.setFuture(QtConcurrent::run(&WindowsOcrEngine::recognize, image, m_settings->ocrLanguage(),
@@ -77,6 +85,10 @@ void OcrTranslator::onRegionSelected(const QImage& image, const QRect& globalRec
 
 void OcrTranslator::onOcrFinished()
 {
+    if (m_ocrCanceled) {
+        m_ocrCanceled = false;
+        return;
+    }
     const OcrOutput output = m_ocrWatcher.result();
     if (!output.ok) {
         m_popup->showError(output.error, m_anchor);

@@ -18,6 +18,7 @@ constexpr qint64 kMaxLogSize = 2 * 1024 * 1024;
 
 QMutex g_mutex;
 QFile* g_file = nullptr;
+QString g_path;
 
 const char* levelName(QtMsgType type)
 {
@@ -59,6 +60,12 @@ void messageHandler(QtMsgType type, const QMessageLogContext& context, const QSt
     {
         QMutexLocker lock(&g_mutex);
         if (g_file && g_file->isOpen()) {
+            // The app runs for weeks from the tray: rotate here too, not only at startup.
+            if (g_file->size() >= kMaxLogSize) {
+                g_file->close();
+                rotateIfNeeded(g_path);
+                g_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+            }
             g_file->write(line.toUtf8());
             g_file->flush();
         }
@@ -86,6 +93,7 @@ void Logger::install()
     {
         QMutexLocker lock(&g_mutex);
         if (!g_file) {
+            g_path = path;
             g_file = new QFile(path); // intentionally leaked: must outlive every static destructor that logs
             if (!g_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
                 ::OutputDebugStringW(L"HYPERS TRANSLATOR: cannot open log file\n");
